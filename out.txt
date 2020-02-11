@@ -1,0 +1,79 @@
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+Succesful Insert
+
+
+ SYMBOL TABLE 
+
+
+<INDENTIFIER, a, 4>
+
+<OPERATOR, =, 4>
+
+<NUMBER, 10, 4>
+
+<KEYWORD, if, 6>
+
+<INDENTIFIER, a, 6>
+
+<OPERATOR, ==, 6>
+
+<NUMBER, 10, 6>
+
+<OPERATOR, :, 6>
+
+<INDENT, 	, 7>
+
+<INDENTIFIER, print, 7>
+
+<OPERATOR, (, 7>
+
+<NUMBER, 13, 7>
+
+<OPERATOR, ), 7>
+
+<KEYWORD, else, 8>
+
+<OPERATOR, :, 8>
+
+<INDENT, 	, 9>
+
+<INDENTIFIER, print, 9>
+
+<OPERATOR, (, 9>
+
+<NUMBER, 23, 9>
+
+<OPERATOR, ), 9>
+
+<ERROR, +, 10>
+
+<ERROR, +, 10>
+
+<NUMBER, 1, 11>
+
+<INDENTIFIER, Akhil, 11>
+
+
+Num of lines 6
