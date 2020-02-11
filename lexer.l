@@ -16,6 +16,7 @@ int count = 0;
 struct node
 {
     char* token;
+    char* value;
     int position;
 };
 
@@ -23,9 +24,11 @@ struct node
 struct node nodes[1000];
 //(struct node*)malloc(sizeof(struct node)*1000);
 
-void insert(char* token,int position){
+void insert(char* token,char *value,int position){
     nodes[count].token = (char*)malloc(100);
+    nodes[count].value = (char*)malloc(100);
     strcpy(nodes[count].token,token);
+    strcpy(nodes[count].value,value);
     //strcpy(nodes[count].position,position);
     nodes[count].position = position;
     printf("Succesful Insert\n");
@@ -39,7 +42,7 @@ void print()
 	printf("\n\n SYMBOL TABLE \n\n");
 	for(i=0;i<count;i++)
 	{
-		printf("\n%s %d\n",nodes[i].token,nodes[i].position);
+		printf("\n<%s, %s, %d>\n",nodes[i].token, nodes[i].value, nodes[i].position);
 	}
 }
 
@@ -51,7 +54,7 @@ else {insert((char*)"ELSE",(char*)yylineno);}
 ***/
 
 digit [0-9]
-alpha [a-zA-Z]
+alpha [a-zA-Z_]
 newline (\n)
 indent \n[\t]+
 space [ ]
@@ -74,47 +77,54 @@ relop (=|==|<|>|<=|>=|!=)
 
 
 END {print();}
-if {insert((char*)"IF",yylineno);}
-elif {insert((char*)"ELIF",yylineno);}
-else {insert((char*)"ELSE",yylineno);}
+if {insert((char*)"KEYWORD",(char*)yytext,yylineno);}
+elif {insert((char*)"KEYWORD",(char*)yytext,yylineno);}
+else {insert((char*)"KEYWORD",(char*)yytext,yylineno);}
 
-while {insert((char*)"WHILE",yylineno);}
+while {insert((char*)"KEYWORD",(char*)yytext,yylineno);}
 
-for {insert((char*)"FOR",yylineno);}
+for {insert((char*)"KEYWORD", (char*)yytext, yylineno);}
 
-"=" {insert((char*)"=",yylineno);}
-"==" {insert((char*)"==",yylineno);}
-"<" {insert((char*)"<",yylineno);}
-">" {insert((char*)">",yylineno);}
-"<=" {insert((char*)"<=",yylineno);}
-">=" {insert((char*)">=",yylineno);}
-"!=" {insert((char*)"!=",yylineno);}
+"=" {insert((char*)"OPERATOR",(char*)yytext , yylineno);}
+"==" {insert((char*)"OPERATOR",(char*)yytext, yylineno);}
+"<" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+">" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+"<=" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+">=" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+"!=" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
 
-or {insert((char*)"OR",yylineno);}
-and {insert((char*)"AND",yylineno);}
-not {insert((char*)"NOT",yylineno);}
-in {insert((char*)"IN",yylineno);}
+or {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+and {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+not {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+in {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
 
-"(" {insert((char*)"(",yylineno);}
-")" {insert((char*)")",yylineno);}
-"{" {insert((char*)"{",yylineno);}
-"}" {insert((char*)"}",yylineno);}
-"[" {insert((char*)"[",yylineno);}
-"]" {insert((char*)"]",yylineno);}
+"(" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+")" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+"{" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+"}" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+"[" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+"]" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
 
-":" {insert((char*)":",yylineno);}
-{indent} {insert((char*)"INDENT",yylineno);}
+":" {insert((char*)"OPERATOR", (char*)yytext, yylineno);}
+{indent} {insert((char*)"INDENT", (char*)"\t", yylineno);}
 
-{digit}+ {insert((char*)yytext,yylineno);}
+{digit}+ {insert((char*)"NUMBER", (char*)yytext, yylineno);}
 
-{alpha}({alpha}|{digit})* {insert((char*)yytext,yylineno);}
+{alpha}({alpha}|{digit})* {insert((char*)"INDENTIFIER", (char*)yytext, yylineno);}
 
+{space} {}
+
+. {insert((char*)"ERROR", (char*)yytext, yylineno);}
 
 
 %% 
   
 /*** Code Section prints the number of 
 capital letter present in the given input***/
+void yyerror()
+{
+	insert((char*)"ERROR", (char*)yytext, yylineno);
+}
 int yywrap(){} 
 int main(){ 
 yylex();
