@@ -1,0 +1,43 @@
+while_stmt ::=  "while" expression ":" suite
+                ["else" ":" suite]
+                
+
+expression ::=  or_test
+
+or_test  ::=  and_test | or_test "or" and_test
+and_test ::=  not_test | and_test "and" not_test
+not_test ::=  comparison | "not" not_test
+
+comparison    ::=  or_expr (comp_operator or_expr)*
+comp_operator ::=  "<" | ">" | "==" | ">=" | "<=" | "!="
+                   | "is" ["not"] | ["not"] "in"
+                   
+
+or_expr  ::=  xor_expr | or_expr "|" xor_expr
+xor_expr ::=  and_expr | xor_expr "^" and_expr
+and_expr ::=  shift_expr | and_expr "&" shift_expr
+shift_expr ::=  a_expr | shift_expr ("<<" | ">>") a_expr
+a_expr ::=  m_expr | a_expr "+" m_expr | a_expr "-" m_expr
+m_expr ::=  u_expr | m_expr "*" u_expr |
+            m_expr "//" u_expr | m_expr "/" u_expr |
+            m_expr "%" u_expr
+u_expr ::=  "**" u_expr | "-" u_expr | "+" u_expr | "~" u_expr|expr
+
+letter := "A"|"B"...............|"z"|"_"
+digit := 0|1|2.......|9
+expr := letter|(letter|digit)*
+
+compound_stmt ::=  if_stmt | while_stmt| suite
+
+suite         ::=  stmt_list NEWLINE | NEWLINE INDENT statement+ DEDENT
+statement     ::=  stmt_list NEWLINE | compound_stmt
+stmt_list     ::=  statement
+
+compound_stmt ::=  if_stmt
+                   | while_stmt
+
+
+
+
+
+

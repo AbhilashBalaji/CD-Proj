@@ -1,0 +1,44 @@
+if_stmt ::=  "if" expression ":" suite
+             ("elif" expression ":" suite)*
+             ["else" ":" suite]
+
+expression             ::=  or_test
+ 
+
+or_test  ::=  and_test | or_test "or" and_test
+and_test ::=  not_test | and_test "and" not_test
+not_test ::=  comparison | "not" not_test
+
+
+comparison    ::=  or_expr (comp_operator or_expr)*
+comp_operator ::=  "<" | ">" | "==" | ">=" | "<=" | "!="
+                   | "is" ["not"] | ["not"] "in"
+
+and_expr ::=  shift_expr | and_expr "&" shift_expr
+xor_expr ::=  and_expr | xor_expr "^" and_expr
+or_expr  ::=  xor_expr | or_expr "|" xor_expr
+
+shift_expr ::=  a_expr | shift_expr ("<<" | ">>") a_expr
+
+m_expr ::=  u_expr | m_expr "*" u_expr  |
+            m_expr "//" u_expr | m_expr "/" u_expr |
+            m_expr "%" u_expr
+a_expr ::=  m_expr | a_expr "+" m_expr | a_expr "-" m_expr
+
+u_expr ::=  "**" u_expr | "-" u_expr | "+" u_expr | "~" u_expr
+
+m_expr ::=  u	_expr | m_expr "*" u_expr  |
+            m_expr "//" u_expr | m_expr "/" u_expr |
+            m_expr "%" u_expr
+
+compound_stmt ::=  if_stmt | suite
+
+suite         ::=  stmt_list NEWLINE | NEWLINE INDENT statement+ DEDENT
+statement     ::=  stmt_list NEWLINE | compound_stmt
+stmt_list     ::=  simple_stmt
+NEWLINE		  ::=  '\n'
+
+compound_stmt ::=  if_stmt
+                   | while_stmt
+
+simple_stmt ::=  statement | if_stmt
