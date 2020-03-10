@@ -1,11 +1,17 @@
-if a == 1 :
+# COmment 1
+'''
+Comment2
+'''
+c = [10,20]
+if a >= 1 :
 	a = 0
-elif b == 1 :
-	b = 0
-else :
-	c = 0
-for i in range(10):
-	b = 1
-while i == 1:
-	i = 1
-	b = 2
+	if b!=1 :
+		 b = 0
+# Comment 2
+for i in range(10) :
+	for j in range(20) :
+		b = 1 
+while a :
+	a = 1
+	while b==1 :
+		b = 1

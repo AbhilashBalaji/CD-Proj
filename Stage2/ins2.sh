@@ -1,3 +1,3 @@
 lex python.l
-yacc python.y -d
-gcc lex.yy.c y.tab.c
+bison python.y --debug 
+gcc lex.yy.c python.tab.c -lfl
