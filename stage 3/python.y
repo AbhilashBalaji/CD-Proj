@@ -13,6 +13,7 @@
 	node *mknode(node *left, node *middle,node *right, char *token);
 	void printtree(node *tree);
 	node* head;
+	//dont even dare touch this 
 	#define YYSTYPE struct node1 *
 %}
 
@@ -25,7 +26,16 @@
 %token IDENTIFIER DIGIT NEWLINE
 
 %%
+/*
+the code has been tested on for loops. has a bug for for loop. mentioned in for_test
 
+TODO:
+ - get for bug fixed
+- test if and while
+- add some basic stuff for suite just for demo
+
+HINTS: mknode inserts into tree. consists of left middle and right child(feel free to change that especially for including the suite part inyo AST)
+*/
 start: list_stmt start |%empty {printf("\nVALID\n");} | errer {}  ;
 
 list_stmt: if_stmt{$$ = mknode($1,NULL,NULL,"IF_BLOCK");head = $$;}| for_stmt {$$ = mknode($1,NULL,NULL,"FOR_BLOCK");head = $$;}| while_stmt {$$ = mknode($1,NULL,NULL,"WHILE_BLOCK");head = $$;};
@@ -38,7 +48,7 @@ optional_else: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELSE COLON NEWLINE
 
 for_stmt: FOR for_test COLON NEWLINE suite {;$$ = mknode($2,NULL,NULL,"FOR");};
 
-for_test: IDENTIFIER IN RANGE LP DIGIT RP {$$ = mknode($1,$3,$5,"IN");}| IDENTIFIER IN IDENTIFIER {$$ = mknode($1,$3,NULL,"IN");};	
+for_test: IDENTIFIER IN RANGE LP DIGIT RP {$$ = mknode($1,$3,$5,"IN");}| IDENTIFIER IN IDENTIFIER {$$ = mknode($1,$3,NULL,"IN");};//doesnt insert IN, RANGE and DIGIT for some reason!!!
 
 while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,NULL,NULL,"WHILE");};
 
