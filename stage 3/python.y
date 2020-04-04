@@ -52,7 +52,7 @@ for_stmt: FOR for_test COLON NEWLINE suite {printf("for_stmt : $2 : %p \n",$2);$
 // Create Nodes for all $ variables $1 , $2 , $3 if its supposed to be a token else it gets ot value from the its child branch
 for_test: IDENTIFIER IN RANGE LP DIGIT RP {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,NULL,"RANGE");$5 = mknode(NULL,NULL,NULL,NULL,"DIGIT");printf("for_test in range $5 : %s\n",$1->token);$$ = mknode($1,$3,$5,NULL,"IN");}| IDENTIFIER IN IDENTIFIER {printf("for_test id in id\n");$$ = mknode($1,$3,NULL,NULL,"IN");};//doesnt insert IN, RANGE and DIGIT for some reason!!!
 
-while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,NULL,NULL,NULL,"WHILE");};
+while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,$5,NULL,NULL,"WHILE");};
 
 test: IDENTIFIER logical_op IDENTIFIER {$$ = mknode($1,$3,NULL,NULL,$2);}| IDENTIFIER logical_op DIGIT {$$ = mknode($1,$3,NULL,NULL,$2);}| IDENTIFIER {$$ = mknode(NULL,NULL,NULL,NULL,$1);};
 
