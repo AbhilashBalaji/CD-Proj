@@ -11,7 +11,9 @@
 		char *token;
 	}node;
 	node *mknode(node *left, node *middle,node *right, char *token);
-	void printtree(node *tree); 
+	void printtree(node *tree);
+	node* head;
+	#define YYSTYPE struct node1 *
 %}
 
 %token IF ELIF ELSE WHILE FOR PRINT IN RANGE 
@@ -24,17 +26,17 @@
 
 %%
 
-start: list_stmt start |%empty {printf("\nVALID\n");} | errer {printf("\nPanic mode VALID\n");}  ;
+start: list_stmt start |%empty {printf("\nVALID\n");} | errer {}  ;
 
-list_stmt: if_stmt | for_stmt | while_stmt;
+list_stmt: if_stmt{$$ = mknode($1,NULL,NULL,"IF_BLOCK");head = $$;}| for_stmt {$$ = mknode($1,NULL,NULL,"FOR_BLOCK");head = $$;}| while_stmt {$$ = mknode($1,NULL,NULL,"WHILE_BLOCK");head = $$;};
 
-if_stmt: IF test COLON NEWLINE suite elif_stmt optional_else {$$ = mknode($2,$6,$7,"IF");};
+if_stmt: IF test COLON NEWLINE suite elif_stmt optional_else {$$ = mknode((node*)$2,(node*)$6,(node*)$7,"IF");printtree($$);};
 
 elif_stmt: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELIF test COLON NEWLINE suite elif_stmt {$$ = mknode($2,$6,NULL,"ELIF");};
 
 optional_else: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELSE COLON NEWLINE suite {$$ = mknode(NULL,NULL,NULL,"ELSE");};
 
-for_stmt: FOR for_test COLON NEWLINE suite {$$ = mknode($2,NULL,NULL,"FOR");};
+for_stmt: FOR for_test COLON NEWLINE suite {;$$ = mknode($2,NULL,NULL,"FOR");};
 
 for_test: IDENTIFIER IN RANGE LP DIGIT RP {$$ = mknode($1,$3,$5,"IN");}| IDENTIFIER IN IDENTIFIER {$$ = mknode($1,$3,NULL,"IN");};	
 
@@ -48,7 +50,7 @@ suite: assign_id_digit suite {$$ = mknode(NULL,NULL,NULL,"suite");}|%empty {$$ =
 
 assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE;
 
-errer: error NEWLINE {printf("%s","error");}
+errer: error NEWLINE {}
 
 /*
 arithmetic_op: IDENTIFIER ASSIGN_OP arithmetic_expression;
@@ -68,11 +70,12 @@ int main()
 {
 	printf("Enter input\n");
 	yyparse();
-	print();
+	printtree(head);
 }
 
 
 node *mknode(node *left, node* middle,node *right, char *token) {
+	//printf("%s Success!!\n",token);
 	/* malloc the node */
 	node *newnode = (node *)malloc(sizeof(node));
 	char *newstr = (char *)malloc(strlen(token)+1);
@@ -85,13 +88,25 @@ node *mknode(node *left, node* middle,node *right, char *token) {
 }
  
 void printtree(node *tree) {
+
+	//printf("For i have entered the devil's belly");
 	int i;
-	if (tree->left || tree->right)
-		printf("(");
-	printf(" %s ", tree->token);
-	if (tree->left)     
+	printf("\n\n");
+	printf(" ROOT: %s \n", tree->token);
+	if (tree->left){
+		printf("Left: "); 
 		printtree(tree->left);
-	if (tree->right)
+		printf("\n");
+	}
+	if (tree->middle){
+		printf("Mid: ");
+		printtree(tree->middle);
+		printf("\n");
+	}
+	if(tree->right){
+		print("Right: ");
 		printtree(tree->right);
-	if (tree->left || tree->right)
-		printf(")"); }
+		printf("\n");
+	}
+//	printf("Token: %s\n",tree->token);
+}

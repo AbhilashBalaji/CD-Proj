@@ -6,7 +6,7 @@
    int scope = 0;
    void ReturnToken(char *token)
    {
-	printf("\n %s \n",token);
+	//printf("\n %s \n",token);
    }
 
    int count_indent(char *text)
@@ -39,17 +39,17 @@ void insert(char* token,char *value,int position){
     //strcpy(nodes[count].position,position);
     nodes[count].position = position;
 	nodes[count].scp = scope;
-    printf("Succesful Insert\n");
+    //printf("Succesful Insert\n");
     count+=1;
 }
 
 void print()
 {
 	int i;
-	printf("\n\n SYMBOL TABLE \n\n");
+	//printf("\n\n SYMBOL TABLE \n\n");
 	for(i=0;i<count;i++)
 	{
-		printf("\n<%s, %s, %d, %d>\n",nodes[i].token, nodes[i].value, nodes[i].position,nodes[i].scp);
+		//printf("\n<%s, %s, %d, %d>\n",nodes[i].token, nodes[i].value, nodes[i].position,nodes[i].scp);
 	}
 }
 
