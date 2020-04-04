@@ -8,9 +8,10 @@
 		struct node *left;
 		struct node *middle;
 		struct node *right;
+		struct node *childfour;
 		char *token;
 	}node;
-	node *mknode(node *left, node *middle,node *right, char *token);
+	node *mknode(node *left, node *middle,node *right,node *childfour, char *token);
 	void printtree(node *tree);
 	node* head;
 	//dont even dare touch this 
@@ -38,30 +39,30 @@ HINTS: mknode inserts into tree. consists of left middle and right child(feel fr
 */
 start: list_stmt start |%empty {printf("\nVALID\n");} | errer {}  ;
 
-list_stmt: if_stmt{$$ = mknode($1,NULL,NULL,"IF_BLOCK");head = $$;}| for_stmt {$$ = mknode($1,NULL,NULL,"FOR_BLOCK");head = $$;}| while_stmt {$$ = mknode($1,NULL,NULL,"WHILE_BLOCK");head = $$;};
+list_stmt: if_stmt{$$ = mknode($1,NULL,NULL,NULL,"IF_BLOCK");head = $$;}| for_stmt {$$ = mknode($1,NULL,NULL,NULL,"FOR_BLOCK");head = $$;}| while_stmt {$$ = mknode($1,NULL,NULL,NULL,"WHILE_BLOCK");head = $$;};
 
-if_stmt: IF test COLON NEWLINE suite elif_stmt optional_else {$$ = mknode((node*)$2,(node*)$6,(node*)$7,"IF");printtree($$);};
+if_stmt: IF test COLON NEWLINE suite elif_stmt optional_else {$$ = mknode((node*)$2,(node*)$6,(node*)$7,NULL,"IF");printtree($$);};
 
-elif_stmt: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELIF test COLON NEWLINE suite elif_stmt {$$ = mknode($2,$6,NULL,"ELIF");};
+elif_stmt: %empty {$$ = mknode(NULL,NULL,NULL,NULL,"empty");}| ELIF test COLON NEWLINE suite elif_stmt {$$ = mknode($2,$6,NULL,NULL,"ELIF");};
 
-optional_else: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELSE COLON NEWLINE suite {$$ = mknode(NULL,NULL,NULL,"ELSE");};
+optional_else: %empty {$$ = mknode(NULL,NULL,NULL,NULL,"empty");}| ELSE COLON NEWLINE suite {$$ = mknode(NULL,NULL,NULL,NULL,"ELSE");};
 
-for_stmt: FOR for_test COLON NEWLINE suite {printf("for_stmt : $2 : %p \n",$2);$$ = mknode($2,NULL,NULL,"FOR");};
+for_stmt: FOR for_test COLON NEWLINE suite {printf("for_stmt : $2 : %p \n",$2);$$ = mknode($2,$5,NULL,NULL,"FOR");};
 
 // Create Nodes for all $ variables $1 , $2 , $3 if its supposed to be a token else it gets ot value from the its child branch
-for_test: IDENTIFIER IN RANGE LP DIGIT RP {$1 = mknode(NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,"RANGE");$5 = mknode(NULL,NULL,NULL,"DIGIT");printf("for_test in range $5 : %s\n",$1->token);$$ = mknode($1,$3,$5,"IN");}| IDENTIFIER IN IDENTIFIER {printf("for_test id in id\n");$$ = mknode($1,$3,NULL,"IN");};//doesnt insert IN, RANGE and DIGIT for some reason!!!
+for_test: IDENTIFIER IN RANGE LP DIGIT RP {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,NULL,"RANGE");$5 = mknode(NULL,NULL,NULL,NULL,"DIGIT");printf("for_test in range $5 : %s\n",$1->token);$$ = mknode($1,$3,$5,NULL,"IN");}| IDENTIFIER IN IDENTIFIER {printf("for_test id in id\n");$$ = mknode($1,$3,NULL,NULL,"IN");};//doesnt insert IN, RANGE and DIGIT for some reason!!!
 
-while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,NULL,NULL,"WHILE");};
+while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,NULL,NULL,NULL,"WHILE");};
 
-test: IDENTIFIER logical_op IDENTIFIER {$$ = mknode($1,$3,NULL,$2);}| IDENTIFIER logical_op DIGIT {$$ = mknode($1,$3,NULL,$2);}| IDENTIFIER {$$ = mknode(NULL,NULL,NULL,$1);};
+test: IDENTIFIER logical_op IDENTIFIER {$$ = mknode($1,$3,NULL,NULL,$2);}| IDENTIFIER logical_op DIGIT {$$ = mknode($1,$3,NULL,NULL,$2);}| IDENTIFIER {$$ = mknode(NULL,NULL,NULL,NULL,$1);};
 
-logical_op: EQ {$$=mknode(NULL,NULL,NULL,"EQ");}| NEQ {$$=mknode(NULL,NULL,NULL,"NEQ");}| LT {$$=mknode(NULL,NULL,NULL,"LT");}| GT {$$=mknode(NULL,NULL,NULL,"GT");}| LTE {$$=mknode(NULL,NULL,NULL,"LTE");}| GTE {$$=mknode(NULL,NULL,NULL,"GTE");};
+logical_op: EQ {$$=mknode(NULL,NULL,NULL,NULL,"EQ");}| NEQ {$$=mknode(NULL,NULL,NULL,NULL,"NEQ");}| LT {$$=mknode(NULL,NULL,NULL,NULL,"LT");}| GT {$$=mknode(NULL,NULL,NULL,NULL,"GT");}| LTE {$$=mknode(NULL,NULL,NULL,NULL,"LTE");}| GTE {$$=mknode(NULL,NULL,NULL,NULL,"GTE");};
 
 // Added chids for suite
-suite: assign_id_digit suite {$$ = mknode($1,$2,NULL,"suite");}|%empty {$$ = mknode(NULL,NULL,NULL,"empty");};
+suite: assign_id_digit suite {$$ = mknode($1,$2,NULL,NULL,"suite");}|%empty {$$ = mknode(NULL,NULL,NULL,NULL,"empty");};
 
 // Added chid for suite (ie need to increase number of children for each node in mknode function)
-assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE{$1 = mknode(NULL,NULL,NULL,"IDENTIFIER");$2 = mknode(NULL,NULL,NULL,"ASSIGN_OP");$3 = mknode(NULL,NULL,NULL,"DIGIT");$$ = mknode($1,$2,$3,"asign_id_digit");}; | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE {$1 = mknode(NULL,NULL,NULL,"IDENTIFIER");$2 = mknode(NULL,NULL,NULL,"ASSIGN_OP");$3 = mknode(NULL,NULL,NULL,"IDENTIFIER");$$ = mknode($1,$2,$3,"asign_id_digit");};
+assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE{$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$2 = mknode(NULL,NULL,NULL,NULL,"ASSIGN_OP");$3 = mknode(NULL,NULL,NULL,NULL,"DIGIT");$$ = mknode($1,$2,$3,NULL,"asign_id_digit");}; | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$2 = mknode(NULL,NULL,NULL,NULL,"ASSIGN_OP");$3 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$$ = mknode($1,$2,$3,NULL,"asign_id_digit");};
 
 errer: error NEWLINE {}
 
@@ -87,7 +88,7 @@ int main()
 }
 
 
-node *mknode(node *left, node* middle,node *right, char *token) {
+node *mknode(node *left, node* middle,node *right,node *childfour ,char *token) {
 	//printf("%s Success!!\n",token);
 	/* malloc the node */
 	node *newnode = (node *)malloc(sizeof(node));
@@ -97,6 +98,7 @@ node *mknode(node *left, node* middle,node *right, char *token) {
 	newnode->middle = middle;
 	newnode->right = right;
 	newnode->token = newstr;
+	newnode->childfour = childfour;
 	return(newnode);
 }
  
@@ -120,6 +122,11 @@ void printtree(node *tree) {
 		print("Right: ");
 		printtree(tree->right);
 		printf("\n");
+	}
+	if(tree->childfour){
+		print("Childfour: ");
+		printtree(tree->childfour);
+		print("\n");
 	}
 //	printf("Token: %s\n",tree->token);
 }
