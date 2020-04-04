@@ -46,9 +46,10 @@ elif_stmt: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELIF test COLON NEWLIN
 
 optional_else: %empty {$$ = mknode(NULL,NULL,NULL,"empty");}| ELSE COLON NEWLINE suite {$$ = mknode(NULL,NULL,NULL,"ELSE");};
 
-for_stmt: FOR for_test COLON NEWLINE suite {;$$ = mknode($2,NULL,NULL,"FOR");};
+for_stmt: FOR for_test COLON NEWLINE suite {printf("for_stmt : $2 : %p \n",$2);$$ = mknode($2,NULL,NULL,"FOR");};
 
-for_test: IDENTIFIER IN RANGE LP DIGIT RP {$$ = mknode($1,$3,$5,"IN");}| IDENTIFIER IN IDENTIFIER {$$ = mknode($1,$3,NULL,"IN");};//doesnt insert IN, RANGE and DIGIT for some reason!!!
+// Create Nodes for all $ variables $1 , $2 , $3 if its supposed to be a token else it gets ot value from the its child branch
+for_test: IDENTIFIER IN RANGE LP DIGIT RP {$1 = mknode(NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,"RANGE");$5 = mknode(NULL,NULL,NULL,"DIGIT");printf("for_test in range $5 : %s\n",$1->token);$$ = mknode($1,$3,$5,"IN");}| IDENTIFIER IN IDENTIFIER {printf("for_test id in id\n");$$ = mknode($1,$3,NULL,"IN");};//doesnt insert IN, RANGE and DIGIT for some reason!!!
 
 while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,NULL,NULL,"WHILE");};
 
@@ -56,9 +57,11 @@ test: IDENTIFIER logical_op IDENTIFIER {$$ = mknode($1,$3,NULL,$2);}| IDENTIFIER
 
 logical_op: EQ {$$=mknode(NULL,NULL,NULL,"EQ");}| NEQ {$$=mknode(NULL,NULL,NULL,"NEQ");}| LT {$$=mknode(NULL,NULL,NULL,"LT");}| GT {$$=mknode(NULL,NULL,NULL,"GT");}| LTE {$$=mknode(NULL,NULL,NULL,"LTE");}| GTE {$$=mknode(NULL,NULL,NULL,"GTE");};
 
-suite: assign_id_digit suite {$$ = mknode(NULL,NULL,NULL,"suite");}|%empty {$$ = mknode(NULL,NULL,NULL,"empty");};
+// Added chids for suite
+suite: assign_id_digit suite {$$ = mknode($1,$2,NULL,"suite");}|%empty {$$ = mknode(NULL,NULL,NULL,"empty");};
 
-assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE;
+// Added chid for suite (ie need to increase number of children for each node in mknode function)
+assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE{$1 = mknode(NULL,NULL,NULL,"IDENTIFIER");$2 = mknode(NULL,NULL,NULL,"ASSIGN_OP");$3 = mknode(NULL,NULL,NULL,"DIGIT");$$ = mknode($1,$2,$3,"asign_id_digit");}; | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE {$1 = mknode(NULL,NULL,NULL,"IDENTIFIER");$2 = mknode(NULL,NULL,NULL,"ASSIGN_OP");$3 = mknode(NULL,NULL,NULL,"IDENTIFIER");$$ = mknode($1,$2,$3,"asign_id_digit");};
 
 errer: error NEWLINE {}
 
