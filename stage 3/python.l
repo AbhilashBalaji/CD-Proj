@@ -18,6 +18,11 @@
 	scope = count;
    }
 
+   int getScope()
+   {
+	return scope;
+   }
+
    int newline1=0;
    int count = 0;
 	struct node

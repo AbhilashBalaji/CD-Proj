@@ -13,9 +13,17 @@
 	}node;
 	node *mknode(node *left, node *middle,node *right,node *childfour, char *token);
 	void printtree(node *tree);
-	node* head;
+	node* head[100];
+	int counter1 = 0;
+	int index = 0;
 	//dont even dare touch this 
 	#define YYSTYPE struct node1 *
+
+	// Variables to keep track of scope
+	int prevscope = 0, currentscope = 0;
+	// To get currentscope call getScope() it returns an integer denoting the number of tabs preceding a given statement
+	// so first time for is encountered keep track of scope in prevscope amd every time a new for is encountered 
+	// call getScope() and check if the returned value matches prevscope or is greater than previous scope
 %}
 
 %token IF ELIF ELSE WHILE FOR PRINT IN RANGE 
@@ -39,7 +47,9 @@ HINTS: mknode inserts into tree. consists of left middle and right child(feel fr
 */
 start: list_stmt start |%empty {printf("\nVALID\n");} | errer {}  ;
 
-list_stmt: if_stmt{$$ = mknode($1,NULL,NULL,NULL,"IF_BLOCK");head = $$;}| for_stmt {$$ = mknode($1,NULL,NULL,NULL,"FOR_BLOCK");head = $$;}| while_stmt {$$ = mknode($1,NULL,NULL,NULL,"WHILE_BLOCK");head = $$;};
+list_stmt: if_stmt{counter1+=1;$$ = mknode($1,NULL,NULL,NULL,"IF_BLOCK");if(head[index]){printtree(head[index]);index++;head[index] = $$;}else{head[index] = $$;}}
+| for_stmt {counter1+=1;$$ = mknode($1,NULL,NULL,NULL,"FOR_BLOCK");if(head[index]){printtree(head[index]);index++;head[index] = $$;}else{head[index] = $$;}}
+| while_stmt {counter1+=1;$$ = mknode($1,NULL,NULL,NULL,"WHILE_BLOCK");if(head[index]){printtree(head[index]);index++;head[index] = $$;}else{head[index] = $$;}}
 
 if_stmt: IF test COLON NEWLINE suite elif_stmt optional_else {$$ = mknode($2,$6,$7,$5,"IF");};
 
@@ -86,7 +96,8 @@ int main()
 {
 	printf("Enter input\n");
 	yyparse();
-	printtree(head);
+	printtree(head[index]);
+	printf("count: %d\n",counter1);
 }
 
 
@@ -132,3 +143,4 @@ void printtree(node *tree) {
 	}
 //	printf("Token: %s\n",tree->token);
 }
+
