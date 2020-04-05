@@ -9,6 +9,7 @@
 		struct node *middle;
 		struct node *right;
 		struct node *childfour;
+		int scope;
 		char *token;
 	}node;
 	node *mknode(node *left, node *middle,node *right,node *childfour, char *token);
@@ -112,6 +113,7 @@ node *mknode(node *left, node* middle,node *right,node *childfour ,char *token) 
 	newnode->right = right;
 	newnode->token = newstr;
 	newnode->childfour = childfour;
+	newnode->scope = getScope();
 	return(newnode);
 }
  
