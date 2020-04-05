@@ -58,10 +58,10 @@ elif_stmt: %empty {$$ = mknode(NULL,NULL,NULL,NULL,"empty_elif");}| ELIF test CO
 
 optional_else: %empty {$$ = mknode(NULL,NULL,NULL,NULL,"empty_else");}| ELSE COLON NEWLINE suite {$$ = mknode(NULL,NULL,NULL,NULL,"ELSE");};
 
-for_stmt: FOR for_test COLON NEWLINE suite {printf("for_stmt : $2 : %p \n",$2);$$ = mknode($2,$5,NULL,NULL,"FOR");};
+for_stmt: FOR for_test COLON NEWLINE suite {$$ = mknode($2,$5,NULL,NULL,"FOR");};
 
 // Create Nodes for all $ variables $1 , $2 , $3 if its supposed to be a token else it gets ot value from the its child branch
-for_test: IDENTIFIER IN RANGE LP DIGIT RP {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,NULL,"RANGE");$5 = mknode(NULL,NULL,NULL,NULL,"DIGIT");printf("for_test in range $5 : %s\n",$1->token);$$ = mknode($1,$3,$5,NULL,"IN");}| IDENTIFIER IN IDENTIFIER {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$$ = mknode($1,$3,NULL,NULL,"IN");};
+for_test: IDENTIFIER IN RANGE LP DIGIT RP {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,NULL,"RANGE");$5 = mknode(NULL,NULL,NULL,NULL,"DIGIT");$$ = mknode($1,$3,$5,NULL,"IN");}| IDENTIFIER IN IDENTIFIER {$1 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$3 = mknode(NULL,NULL,NULL,NULL,"IDENTIFIER");$$ = mknode($1,$3,NULL,NULL,"IN");};
 
 while_stmt: WHILE test COLON NEWLINE suite{$$ = mknode($2,$5,NULL,NULL,"WHILE");};
 
@@ -97,8 +97,11 @@ int main()
 {
 	printf("Enter input\n");
 	yyparse();
-	printtree(head[index]);
-	printf("count: %d\n",counter1);
+	//printtree(head[index]);
+	//printf("count: %d\n",counter1);
+	printf("-----lEVEL oRDER------(number in parenthesis in number of children that node has)\n\n");
+	printlevelorder(head[index]);
+	printf("\n-----END----------------\n");
 }
 
 
@@ -144,5 +147,40 @@ void printtree(node *tree) {
 		print("\n");
 	}
 //	printf("Token: %s\n",tree->token);
+}
+
+void printlevelorder(node *tree)
+{
+	node *queue[200];
+	int front = 0, back  = 0;
+	queue[back++] = tree;
+	int nocld = 0;
+	//printf("%s\n",tree->token);
+	while(front<back)
+	{
+		nocld = 0;
+		if(queue[front]->left)
+		{
+			queue[back++] = queue[front]->left;
+			nocld++;
+		}
+		if(queue[front]->middle)
+		{
+			queue[back++] = queue[front]->middle;
+			nocld++;
+		}
+		if(queue[front]->right)
+		{
+			queue[back++] = queue[front]->right;
+			nocld++;
+		}
+		if(queue[front]->childfour)
+		{
+			queue[back++] = queue[front]->childfour;
+			nocld++;
+		}
+		printf("%s (%d)\n",queue[front]->token,nocld);
+		front++;
+	}
 }
 
