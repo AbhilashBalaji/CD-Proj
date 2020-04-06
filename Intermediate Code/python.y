@@ -122,7 +122,7 @@ IDENTIFIER logical_op IDENTIFIER
 	printf("iffalse %s go to L%d\n",$1,branchno);
 };
 
-if_suite: if_assign_id_digit if_suite {printf("\ngo to L%d\n",endofif);printf("\nL%d:\n",branchno++);} | %empty ;
+if_suite: if_assign_id_digit if_suite {printf("\ngo to L%d\n",endofif);printf("\nL%d:\n",branchno++);} | assign_id_digit suite |%empty ;
 
 if_assign_id_digit: 
 IDENTIFIER ASSIGN_OP DIGIT NEWLINE 
