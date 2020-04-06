@@ -1,13 +1,13 @@
 %{
 	#include<stdio.h>
 	#include<stdlib.h>
+	#include<string.h>
 	#define INSLEN 200
 	#define STKSIZE 1000
 	int yy_debug = 1;
 	int yylex();
 	int yyerror(char *msg);
 	int counter1 = 0;
-	int index = 0;
 	typedef struct indent1{
 		int lno;
 		int scope;
@@ -15,12 +15,13 @@
 	indent indents[100];
 	//dont even dare touch this 
 	int tempno = 0;
-	int branchno = 1;
-	int endofif = 0;
+	int branchno = 0;
 	// Variables to keep track of scope
 	int prevscope = 0, currentscope = 0;
 	void istack(int line,int indent);
 	int stack_len = -1;
+
+	
 	typedef struct StackNode
 	{
 		char *instruction;
@@ -30,6 +31,12 @@
 
 	InstructionStack insStack[STKSIZE];
 
+	/*
+	for(int q=0;q<STKSIZE;q++)
+	{
+		insStack[q].instruction = (char *)malloc(sizeof(char)*INSLEN));
+	}
+	*/
 	// To get currentscope call getScope() it returns an integer denoting the number of tabs preceding a given statement
 	// so first time for is encountered keep track of scope in prevscope amd every time a new for is encountered 
 	// call getScope() and check if the returned value matches prevscope or is greater than previous scope
@@ -85,86 +92,120 @@
 %type <String_value> logical_op
 %type <String_value> suite
 %type <String_value> assign_id_digit
-%type <String_value> if_test
-%type <String_value> if_suite
-%type <String_value> if_assign_id_digit
+
 %%
-start: list_stmt start |%empty {printf("\nVALID\n");} | errer {}  ;
+start: list_stmt start {printf("\nVALID\n");}|%empty {printf("\nVALID\n");} | errer {printf("ERROR");}  ;
 
-list_stmt: if_stmt | for_stmt  | while_stmt ;
+list_stmt: if_stmt{}| for_stmt {} | while_stmt {} ;
 
-if_stmt: IF if_test COLON NEWLINE if_suite elif_stmt optional_else 
+if_stmt: IF test COLON NEWLINE suite elif_stmt optional_else;
+
+elif_stmt: %empty | ELIF test COLON NEWLINE suite elif_stmt ;
+
+optional_else: %empty | ELSE COLON NEWLINE suite ;
+
+for_stmt: FOR for_test COLON NEWLINE suite 
 {
-	char *newins;char num;
-	newins = (char *)malloc(sizeof(char)*INSLEN);
+	char num;
+	char *newins = (char *)malloc(sizeof(char)*INSLEN);
+	strcpy(newins,(char *)"t");
+	num = tempno + '0';
+	strncat(newins,&num,1);
+	strncat(newins,(char *)" = ",strlen((char *)" = "));
+	strncat(newins,(char *)$2,strlen((char *)$2));
+	strncat(newins,(char *)"\nL",strlen((char *)"\nL"));
+	num = branchno+1+ '0';
+	strncat(newins,&num,1);
+	strncat(newins,(char *)":\n",strlen((char *)":\n"));
+	strncat(newins,(char *)"iffalse ",strlen((char *)"iffalse "));
+	insertInstruction(newins);
 	free(newins);
-	printf("\nL%d\n",endofif);
-	endofif=branchno+1;branchno+=2;
+	tempno+=1;
+	branchno+=2;
 };
 
-elif_stmt: %empty {} | ELIF if_test COLON NEWLINE if_suite elif_stmt ;
-
-optional_else: %empty {} | ELSE COLON NEWLINE if_suite ;
-
-if_test: 
-IDENTIFIER logical_op IDENTIFIER 
-{ 
-	printf("iffalse %s %s %s go to L%d\n",$1,$2,$3,branchno);
-	//branchno+=1;
-} 
-| IDENTIFIER logical_op DIGIT
-{ 
-	printf("iffalse %s %s %s go to L%d\n",$1,$2,$3,branchno);
-	//branchno+=1;
-} 
-| IDENTIFIER 
+for_test: IDENTIFIER IN RANGE LP DIGIT RP 
 {
-	printf("iffalse %s go to L%d\n",$1,branchno);
+	char num;
+	char *newins = (char *)malloc(sizeof(char)*INSLEN);
+	strcpy(newins,(char *)"t");
+	num = tempno + '0';
+	strncat(newins,&num,1);
+	strncat(newins,(char *)"",1);
+
 };
-
-if_suite: if_assign_id_digit if_suite {printf("\ngo to L%d\n",endofif);printf("\nL%d:\n",branchno++);} | %empty ;
-
-if_assign_id_digit: 
-IDENTIFIER ASSIGN_OP DIGIT NEWLINE 
-{
-	printf("%s %s %s\n",$1,$2,$3);
-} 
-| IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE 
-{
-printf("%s %s %s\n",$1,$2,$3);
-};
-
-for_stmt: FOR for_test COLON NEWLINE suite {printf("go to L%d:\n",branchno+1);istack(branchno,getScope());branchno+=2;};
-
-for_test: IDENTIFIER IN RANGE LP DIGIT RP {printf("\nt%d = %s\nL%d:iffalse t%d > %s goto L%d\nt%d = %s + 1\n%s = t%d\n",tempno,$1,branchno+1,tempno,$5,branchno,tempno,$1,$1,tempno);tempno++;};
 
 while_stmt: WHILE test COLON NEWLINE suite ;
 
 
-test: 
-IDENTIFIER logical_op IDENTIFIER 
-{ 
-printf("%s %s %s\n",$1,$2,$3);
-} 
-| IDENTIFIER logical_op DIGIT
-{ 
+test: IDENTIFIER logical_op IDENTIFIER 
+{
 printf("%s %s %s\n",$1,$2,$3);
 } 
 | IDENTIFIER 
 {
-printf("%s\n",$1);
+printf("%s \n",$1);
 };
 
 logical_op: EQ | NEQ | LT | GT | LTE | GTE ;
 
 suite: assign_id_digit suite | %empty ;
 
-assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE {printf("%s %s %s\n",$1,$2,$3);} | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE {printf("%s %s %s\n",$1,$2,$3);};
+assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE 
+{
 
-errer: error NEWLINE ;
+char *newins = (char *)malloc(sizeof(char)*INSLEN);
+strcpy(newins,(char *)"go to L");
+char num;
+num = branchno+1+ '0';
+strncat(newins,&num,1);
+strncat(newins,(char *)"\n",strlen((char *)"\n"));
+insertInstruction(newins);
+free(newins);
+
+
+newins = (char *)malloc(sizeof(char)*INSLEN);
+strcpy(newins,$1);
+strncat(newins,(char *)" ",strlen((char *)" "));
+strncat(newins,$2,strlen($2));
+strncat(newins,(char *)" ",strlen((char *)" "));
+strncat(newins,$3,strlen($3));
+strncat(newins,(char *)"\n",strlen((char *)"\n"));
+insertInstruction(newins);
+free(newins);
+
+printf("%s %s %s\n",$1,$2,$3);
+} 
+| IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE 
+{
+
+char *newins = (char *)malloc(sizeof(char)*INSLEN);
+strcpy(newins,(char *)"go to L");
+char num;
+num = branchno+1+ '0';
+strncat(newins,&num,1);
+strncat(newins,(char *)"\n",strlen((char *)"\n"));
+insertInstruction(newins);
+free(newins);
+
+newins = (char *)malloc(sizeof(char)*INSLEN);
+strcpy(newins,$1);
+strncat(newins,(char *)" ",strlen((char *)" "));
+strncat(newins,$2,strlen($2));
+strncat(newins,(char *)" ",strlen((char *)" "));
+strncat(newins,$3,strlen($3));
+strncat(newins,(char *)"\n",strlen((char *)"\n"));
+insertInstruction(newins);
+free(newins);
+
+//printf("%s %s %s\n",$1,$2,$3);
+};
+
+errer: error NEWLINE {};
 
 
 %%
+
 void insertInstruction(char *ins)
 {
 	insStack[topofstack].instruction = (char *)malloc(sizeof(char)*INSLEN);
@@ -215,6 +256,7 @@ int main()
 {
 	printf("Enter input\n");
 	yyparse();
+	PrintIntermediateCode();
 	//printtree(head[index]);
 	//printf("count: %d\n",counter1);
 	//printf("-----lEVEL oRDER------(number in parenthesis in number of children that node has)\n\n");

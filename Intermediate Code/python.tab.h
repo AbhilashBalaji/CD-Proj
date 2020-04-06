@@ -86,7 +86,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 20 "python.y" /* yacc.c:1909  */
+#line 39 "python.y" /* yacc.c:1909  */
 
 	char String_value[300];
 
