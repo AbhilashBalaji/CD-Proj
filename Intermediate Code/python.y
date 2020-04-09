@@ -2,8 +2,8 @@
 	#include<stdio.h>
 	#include<stdlib.h>
 	#define INSLEN 200
-	#define STKSIZE 1000
 	int yy_debug = 1;
+	int endofif = 0;
 	int yylex();
 	int yyerror(char *msg);
 	int counter1 = 0;
@@ -21,15 +21,6 @@
 	int prevscope = 0, currentscope = 0;
 	void istack(int line,int indent);
 	int stack_len = -1;
-	typedef struct StackNode
-	{
-		char *instruction;
-	}InstructionStack;
-	void insertInstruction(char *ins);
-	int topofstack = 0;
-
-	InstructionStack insStack[STKSIZE];
-
 	// To get currentscope call getScope() it returns an integer denoting the number of tabs preceding a given statement
 	// so first time for is encountered keep track of scope in prevscope amd every time a new for is encountered 
 	// call getScope() and check if the returned value matches prevscope or is greater than previous scope
@@ -85,11 +76,9 @@
 %type <String_value> logical_op
 %type <String_value> suite
 %type <String_value> assign_id_digit
-%type <String_value> if_test
-%type <String_value> if_suite
-%type <String_value> if_assign_id_digit
+
 %%
-start: list_stmt start |%empty {printf("\nVALID\n");} | errer {}  ;
+start: list_stmt start |%empty {printf("\nVALID\n");} | errer {printf("Error\n");}  ;
 
 list_stmt: if_stmt | for_stmt  | while_stmt ;
 
@@ -134,54 +123,38 @@ IDENTIFIER ASSIGN_OP DIGIT NEWLINE
 printf("%s %s %s\n",$1,$2,$3);
 };
 
-for_stmt: FOR for_test COLON NEWLINE suite {printf("go to L%d:\n",branchno+1);istack(branchno,getScope());branchno+=2;};
+for_stmt: FOR for_test COLON NEWLINE suite {istack(branchno,getScope());branchno+=2;};
 
-for_test: IDENTIFIER IN RANGE LP DIGIT RP {printf("\nt%d = %s\nL%d:iffalse t%d > %s goto L%d\nt%d = %s + 1\n%s = t%d\n",tempno,$1,branchno+1,tempno,$5,branchno,tempno,$1,$1,tempno);tempno++;};
+for_test: IDENTIFIER IN RANGE LP DIGIT RP {printf("\nt%d = %s\nL%d:iffalse t%d < %s goto L%d\nt%d = %s + 1\n%s = t%d\n",tempno,$1,branchno+1,tempno,$5,branchno,tempno,$1,$1,tempno);tempno++;};
 
-while_stmt: WHILE test COLON NEWLINE suite ;
+while_stmt: WHILE test COLON NEWLINE suite{istack(branchno,getScope());branchno+=2;};
 
 
-test: 
-IDENTIFIER logical_op IDENTIFIER 
+test:IDENTIFIER logical_op IDENTIFIER 
 { 
-printf("%s %s %s\n",$1,$2,$3);
+printf("\nt%d = %s\nL%d: iffalse t%d %s %s goto L%d\n",tempno,$1,branchno+1,tempno,$2,$3,branchno,tempno,$1,$1,tempno);
 } 
 | IDENTIFIER logical_op DIGIT
 { 
-printf("%s %s %s\n",$1,$2,$3);
+printf("\nt%d = %s\nL%d: iffalse t%d %s %s goto L%d\n",tempno,$1,branchno+1,tempno,$2,$3,branchno,tempno,$1,$1,tempno);
 } 
 | IDENTIFIER 
 {
-printf("%s\n",$1);
+printf("\nt%d = %s\nL%d: iffalse t%d goto L%d\nt%d = %s+2\n%s = t%d\n",tempno,$1,branchno+1,tempno,branchno,tempno,$1,$1,tempno);tempno++;
 };
 
 logical_op: EQ | NEQ | LT | GT | LTE | GTE ;
 
 suite: assign_id_digit suite | %empty ;
 
-assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE {printf("%s %s %s\n",$1,$2,$3);} | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE {printf("%s %s %s\n",$1,$2,$3);};
+assign_id_digit: IDENTIFIER ASSIGN_OP DIGIT NEWLINE {printf("%s %s %s\n",$1,$2,$3);} | IDENTIFIER ASSIGN_OP IDENTIFIER NEWLINE {printf("%s %s %s\n",$1,$2,$3);}
+		|IDENTIFIER ASSIGN_OP IDENTIFIER PLUS_OP DIGIT NEWLINE {printf("%s %s t%d %s %s\n",$1,$2,tempno,$4,$5);tempno++;} |IDENTIFIER ASSIGN_OP IDENTIFIER PLUS_OP IDENTIFIER NEWLINE {printf("%s %s t%d %s %s\n",$1,$2,tempno,$4,$5);tempno++;}
+		|IDENTIFIER ASSIGN_OP IDENTIFIER MINUS_OP DIGIT NEWLINE {printf("%s %s t%d %s %s\n",$1,$2,tempno,$4,$5);tempno++;} |IDENTIFIER ASSIGN_OP IDENTIFIER MINUS_OP IDENTIFIER NEWLINE {printf("%s %s t%d %s %s\n",$1,$2,tempno,$4,$5);tempno++;};
 
 errer: error NEWLINE ;
 
 
 %%
-void insertInstruction(char *ins)
-{
-	insStack[topofstack].instruction = (char *)malloc(sizeof(char)*INSLEN);
-	strcpy(insStack[topofstack].instruction,ins);
-	strncat(insStack[topofstack].instruction,(char *)"\0",1);
-	topofstack++;
-}
-
-void PrintIntermediateCode()
-{
-	printf("\n----------INTERMEDIATE CODE----------\n\n");
-	for(int i=topofstack-1;i>=0;i--)
-	{
-		printf("%s",insStack[i].instruction);
-	}
-	printf("\n\n-------------------END---------------\n");
-}
 
 void istack(int line,int indent){
 	if(stack_len==-1){
@@ -192,8 +165,10 @@ void istack(int line,int indent){
 
 	else if(stack_len>=0){
 		if(indent<=indents[stack_len].scope && stack_len>=0){
+			printf("goto L%d\n",line+1);
 			printf("L%d\n",line);
 			while(indent<=indents[stack_len].scope && stack_len>=0){
+				printf("goto L%d\n",indents[stack_len].lno+1);
 				printf("L%d\n",indents[stack_len].lno);
 				stack_len--;
 			}
