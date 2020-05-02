@@ -1,0 +1,12 @@
+t0 = i
+L2:
+iffalse t0 < 10 goto L1
+t1 = j
+L4:
+iffalse t1 < 10 goto L3
+j = t1 + 1
+i = t0 + 2
+goto L4
+L3:
+goto L2
+L1:

@@ -1,0 +1,22 @@
+iffalse a == 10 goto L1
+c = 2
+f = 30
+g = 10
+h = 10
+i = 10
+j = 0
+k = 10
+l = j 
+k = k 
+
+L1:
+
+L2:
+iffalse b == 10 goto L3
+
+
+goto L0
+
+L3:
+
+L0:

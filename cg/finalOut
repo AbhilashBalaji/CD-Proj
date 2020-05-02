@@ -1,0 +1,16 @@
+SUB a a 10
+BEZ a L1
+ST c, $2
+ST f, $30
+ST g, $10
+ST h, $10
+ST i, $10
+ST j, $0
+ST k, $10
+L1:
+L2:
+SUB b b 10
+BEZ b L3
+BR L0
+L3:
+L0:
