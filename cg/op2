@@ -1,7 +1,7 @@
-t0 = i
+t0 = 1
 L2:
 iffalse t0 < 10 goto L1
-t1 = j
+t1 = 2
 L4:
 iffalse t1 < 10 goto L3
 j = t1 + 1
